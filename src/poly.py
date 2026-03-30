@@ -12,10 +12,13 @@ def poly_sub(a: List[int], b: List[int], q: int) -> List[int]:
 
 def poly_mul_mod(a: List[int], b: List[int], q: int, n: int) -> List[int]:
     """
-    Multiply in R_q = Z_q[X]/(X^n + 1) using naive convolution.
+    Multiplies two polynomials and returns a list of coefficients.
+    Inputs: coefficient lists a,b modulus q, and degree n.
+    Output: a list of length n with coefficients reduced mod q. 
+    Multiply in R_q = Z_q[X]/(X^n + 1).
     Rule: X^n = -1, so terms wrap with a sign flip.
     """
-    res = [0] * n
+    res = [0] * n # initialize with n zero coefficients
     for i in range(n):
         for j in range(n):
             prod = a[i] * b[j]
