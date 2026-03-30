@@ -11,7 +11,7 @@ This is a pedagogical implementation:
 from __future__ import annotations
 import hashlib
 import os
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 from params import (
     N, Q, K, ETA1, ETA2, DU, DV,
@@ -24,9 +24,6 @@ from encoding import (
     byte_encode_d, byte_decode_d,
     bytes_to_bits, bits_to_bytes
 )
-
-# For exact encoding of coefficients mod Q in keys
-DQ = (Q - 1).bit_length()  # e.g. Q=97 -> DQ=7
 
 CIPHERTEXT_BYTES = K * ENCODED_POLY_DU_BYTES + ENCODED_POLY_DV_BYTES
 MSG_BYTES = (N + 7) // 8
