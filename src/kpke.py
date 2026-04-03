@@ -1,12 +1,4 @@
-"""
-Toy ML-KEM K-PKE layer.
-
-This is a pedagogical implementation:
-- Ring: R_q = Z_q[X]/(X^N + 1)
-- Naive polynomial multiplication (no NTT)
-- Small toy parameters from params.py
-
-"""
+# src/kpke.py
 
 from __future__ import annotations
 import hashlib
