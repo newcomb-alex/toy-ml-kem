@@ -23,14 +23,14 @@ def _H(data: bytes) -> bytes:
 
 def _J(data: bytes) -> bytes:
     """KDF helper: 32-byte shared-key output."""
-    return hashlib.sha3_256(data).digest()
+    return hashlib.shake_256(data).digest(32)
 
 
 def _G(data: bytes) -> Tuple[bytes, bytes]:
     """
     Expand input into (Kbar, r), each 32 bytes.
     """
-    out = hashlib.shake_256(data).digest(64)
+    out = hashlib.sha3_512(data).digest()
     return out[:32], out[32:]
 
 
@@ -84,16 +84,14 @@ def mlkem_encaps_internal(ek: Dict, m: bytes) -> Tuple[bytes, bytes]:
     Internal encapsulation with caller-provided message seed m.
 
     Steps:
-      Kbar, r = G(m || H(ek))
+      K, r = G(m || H(ek))
       c       = K-PKE.Encrypt(ek, m, r)
-      K       = J(Kbar || H(c))
     """
     m = (m + b"\x00" * MSG_BYTES)[:MSG_BYTES]
     h_ek = _H(_encode_ek_for_hash(ek))
 
-    Kbar, r = _G(m + h_ek)
+    K, r = _G(m + h_ek)
     c = kpke_encrypt(ek, m, r)
-    K = _J(Kbar + _H(c))
     return c, K
 
 
@@ -101,12 +99,13 @@ def mlkem_decaps_internal(dk: Dict, c: bytes) -> bytes:
     """
     Internal decapsulation.
 
-    Steps:
-      m'          = K-PKE.Decrypt(dk_pke, c)
-      Kbar', r'   = G(m' || h_ek)
-      c'          = K-PKE.Encrypt(ek, m', r')
-      if c == c': K = J(Kbar' || H(c))
-      else:       K = J(z || H(c))
+    FIPS-203-style steps:
+      m'        = K-PKE.Decrypt(dk_pke, c)
+      K', r'    = G(m' || h_ek)
+      Kbar      = J(z || c)      # fallback key
+      c'        = K-PKE.Encrypt(ek, m', r')
+      if c == c': return K'
+      else:       return Kbar
     """
     dk_pke = dk["dk_pke"]
     ek = dk["ek"]
@@ -114,14 +113,14 @@ def mlkem_decaps_internal(dk: Dict, c: bytes) -> bytes:
     z = dk["z"]
 
     m_prime = kpke_decrypt(dk_pke, c)
-    Kbar_prime, r_prime = _G(m_prime + h_ek)
+    K_prime, r_prime = _G(m_prime + h_ek)
+    Kbar = _J(z + c)
     c_prime = kpke_encrypt(ek, m_prime, r_prime)
 
-    hc = _H(c)
     if hmac.compare_digest(c, c_prime):
-        return _J(Kbar_prime + hc)
+        return K_prime
     else:
-        return _J(z + hc)
+        return Kbar
 
 
 # -----------------------------
