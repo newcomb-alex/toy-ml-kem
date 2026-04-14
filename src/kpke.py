@@ -176,7 +176,7 @@ def kpke_keygen(seed: bytes | None = None) -> Tuple[Dict, Dict]:
     return ek, dk
 
 
-def kpke_encrypt(ek: Dict, m: bytes, coins: bytes | None = None) -> bytes:
+def kpke_encrypt(ek: Dict, m: bytes, r: bytes | None = None) -> bytes:
     """
     K-PKE.Encrypt
 
@@ -191,8 +191,8 @@ def kpke_encrypt(ek: Dict, m: bytes, coins: bytes | None = None) -> bytes:
     rho: bytes = ek["rho"]
     t: List[List[int]] = ek["t"]
 
-    if coins is None:
-        coins = os.urandom(32)
+    if r is None:
+        r = os.urandom(32)
 
     # Expand A from rho
     A = _expand_a(rho, K)
@@ -202,12 +202,12 @@ def kpke_encrypt(ek: Dict, m: bytes, coins: bytes | None = None) -> bytes:
     e1: List[List[int]] = []
     nonce = 0
     for _ in range(K):
-        y.append(_sample_noise_poly(coins, nonce, ETA1))
+        y.append(_sample_noise_poly(r, nonce, ETA1))
         nonce += 1
     for _ in range(K):
-        e1.append(_sample_noise_poly(coins, nonce, ETA2))
+        e1.append(_sample_noise_poly(r, nonce, ETA2))
         nonce += 1
-    e2 = _sample_noise_poly(coins, nonce, ETA2)
+    e2 = _sample_noise_poly(r, nonce, ETA2)
 
     mu = _msg_to_poly(m)
 
