@@ -1,7 +1,7 @@
 import time
 from mlkem import mlkem_keygen, mlkem_encaps, mlkem_decaps
 
-NUM_TRIALS = 1
+NUM_TRIALS = 100
 successes = 0
 
 start_time = time.perf_counter()
