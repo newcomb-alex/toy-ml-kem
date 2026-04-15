@@ -34,20 +34,26 @@ def _prf(seed: bytes, nonce: int, out_len: int, domain: bytes = b"") -> bytes:
 
 def _sample_uniform_poly(seed: bytes, i: int, j: int, n: int = N, q: int = Q) -> List[int]:
     """
-    Deterministically sample polynomial with coefficients in [0, q-1].
-    Uses simple rejection sampling from SHAKE128 output bytes.
+    Deterministically sample polynomial with coefficients in [0, q-1]
+    using 16-bit rejection sampling from SHAKE128 output.
+    Works for q < 2^16.
     """
     out: List[int] = []
-    cutoff = (256 // q) * q  # accept bytes < cutoff, then mod q
+    cutoff = ((1 << 16) // q) * q  # largest multiple of q below 65536
 
     counter = 0
     while len(out) < n:
-        buf = hashlib.shake_128(seed + bytes([i & 0xFF, j & 0xFF, counter & 0xFF])).digest(64)
-        for b in buf:
-            if b < cutoff:
-                out.append(b % q)
+        # Use a multi-byte counter so input does not repeats every 256 rounds
+        inp = seed + bytes([i & 0xFF, j & 0xFF]) + counter.to_bytes(4, "little")
+        buf = hashlib.shake_128(inp).digest(128)  # 64 candidates (2 bytes each)
+
+        for t in range(0, len(buf) - 1, 2):
+            x = buf[t] | (buf[t + 1] << 8)  # 0..65535
+            if x < cutoff:
+                out.append(x % q)
                 if len(out) == n:
                     break
+
         counter += 1
 
     return out
