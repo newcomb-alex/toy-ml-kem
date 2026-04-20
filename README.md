@@ -6,3 +6,4 @@ This project only users standard python libraries. No dependencies are required 
 
 Run the test_mlkem.py script directly from the main project directory by running "python .\src\test_mlkem.py" within powershell or command prompt. 
  
+To change the parameters, edit the parameters in params.py.
