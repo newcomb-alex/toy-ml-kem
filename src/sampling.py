@@ -1,12 +1,6 @@
 # src/sampling.py
 from typing import List, Callable
-
-def bytes_to_bits(byte_arr: bytes) -> List[int]:
-    bits = []
-    for b in byte_arr:
-        for i in range(8):
-            bits.append((b >> i) & 1)
-    return bits
+from encoding import bytes_to_bits
 
 def sample_cbd(eta: int, n: int, prng_bytes: Callable[[int], bytes], q: int) -> List[int]:
     """
