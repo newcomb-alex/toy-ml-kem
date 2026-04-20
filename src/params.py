@@ -1,12 +1,12 @@
 # Toy ML-KEM parameters (very small)
-N = 256        # polynomial degree
-Q = 3329        # modulus
+N = 16        # polynomial degree
+Q = 97        # modulus
 K = 2         # module dimension
 
-ETA1 = 3
+ETA1 = 2
 ETA2 = 2
 
-DU = 10
+DU = 4
 DV = 4
 
 # Derived sizes for toy encoding
