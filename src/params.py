@@ -1,4 +1,4 @@
-# Toy ML-KEM parameters (very small)
+# Toy ML-KEM parameters
 N = 16        # polynomial degree
 Q = 97        # modulus
 K = 2         # module dimension
